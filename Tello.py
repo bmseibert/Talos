@@ -10,21 +10,28 @@ class Tello:
         self.host = ''
         self.port = 9000
         self.locaddr = (self.host, self.port)
-
-        # Create a UDP socket
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
         self.tello_address = ('192.168.10.1', 8889)
-
+        # Create a UDP socket
+        try:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        except socket.error as err:
+            print(err)
+            exit()
         self.sock.bind(self.locaddr)
         self.begin_recv()
+        # Send Initialization command 'command' to Tello
+        try:
+            self.send_command('command')
+            time.sleep(5)
+        except socket.error as err:
+            print(err)
 
     def recv(self):
         count = 0
         while True:
             try:
                 data, server = self.sock.recvfrom(1518)
-                print(data.decode(encoding="utf-8"))
+                print("Command Status: " + data.decode(encoding="utf-8"))
             except Exception:
                 print('\nExit . . .\n')
                 break
@@ -36,71 +43,16 @@ class Tello:
     def send_command(self, command):
         msg = command.encode(encoding="utf-8")
         sent = self.sock.sendto(msg, self.tello_address)
+        return sent
 
-    # def __init__(self):
-    #     self.local_ip = ''
-    #     self.local_port = 8889
-    #     self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # socket for sending cmd
-    #     self.socket.bind((self.local_ip, self.local_port))
-    #
-    #     # thread for receiving cmd ack
-    #     self.receive_thread = threading.Thread(target=self._receive_thread)
-    #     self.receive_thread.daemon = True
-    #     self.receive_thread.start()
-    #
-    #     self.tello_ip = '192.168.10.1'
-    #     self.tello_port = 8889
-    #     self.tello_adderss = (self.tello_ip, self.tello_port)
-    #     self.log = []
-    #
-    #     self.MAX_TIME_OUT = 15.0
-    #     print("Init Complete")
-    #
-    # def send_command(self, command):
-    #     """
-    #     Send a command to the ip address. Will be blocked until
-    #     the last command receives an 'OK'.
-    #     If the command fails (either b/c time out or error),
-    #     will try to resend the command
-    #     :param command: (str) the command to send
-    #     :param ip: (str) the ip of Tello
-    #     :return: The latest command response
-    #     """
-    #     self.log.append(Stats(command, len(self.log)))
-    #
-    #     self.socket.sendto(command.encode('utf-8'), self.tello_adderss)
-    #     print('sending command: %s to %s' % (command, self.tello_ip))
-    #
-    #     start = time.time()
-    #     while not self.log[-1].got_response():
-    #         now = time.time()
-    #         diff = now - start
-    #         if diff > self.MAX_TIME_OUT:
-    #             print('Max timeout exceeded... command %s' % command)
-    #             # TODO: is timeout considered failure or next command still get executed
-    #             # now, next one got executed
-    #             return
-    #     print('Done!!! sent command: %s to %s' % (command, self.tello_ip))
-    #
-    # def _receive_thread(self):
-    #     """Listen to responses from the Tello.
-    #     Runs as a thread, sets self.response to whatever the Tello last returned.
-    #     """
-    #     while True:
-    #         try:
-    #             self.response, ip = self.socket.recvfrom(1024)
-    #             print('from %s: %s' % (ip, self.response))
-    #
-    #             self.log[-1].add_response(self.response)
-    #         except socket.error as exc:
-    #             print("Caught exception socket.error : %s" % exc)
-    #
-    # def on_close(self):
-    #     pass
-    #     # for ip in self.tello_ip_list:
-    #     #     self.socket.sendto('land'.encode('utf-8'), (ip, 8889))
-    #     # self.socket.close()
-    #
-    # def get_log(self):
-    #     return self.log
+    def get_status(self):
+        speed = self.send_command('speed?')
+        battery = self.send_command('battery?')
+        current_time = self.send_command('time?')
+        height = self.send_command('height?')
 
+        print('-----------Informaiton------------')
+        print('Speed: %f cm/s' % float(speed))
+        print('Battery: %f %%' % float(battery))
+        print('Time: %f' % float(current_time))
+        print('Height: %f' % float(height))
