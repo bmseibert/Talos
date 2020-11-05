@@ -1,8 +1,7 @@
 import threading
 import socket
-import sys
+import cv2
 import time
-import platform
 from Talos import TelloState
 
 
