@@ -16,6 +16,8 @@ class TelloState:
         self.tello_port = 8889
         self.tello_adderss = (self.tello_ip, self.tello_port)
         self.socket.sendto('command'.encode('utf-8'), self.tello_adderss)
+        # State contains [pitch, roll, yaw, vgx, vgy, vgz, templ, temph, tof, h, bat, baro, time, agx, agy, agz]
+        self.state = []
 
         self.begin_recv()
 
@@ -35,7 +37,11 @@ class TelloState:
         recv_thread = threading.Thread(target=self.recv)
         recv_thread.start()
 
-    def report(self, str):
-        print("Tello State: ")
-        for s in str:
-            print(s)
+    def report(self, raw_str):
+        result = []
+        for i in range(len(raw_str) - 1):
+            temp = raw_str[i].split(':')
+            if temp != 'ok':
+                result.append(temp[1])
+        self.state = result
+        print([s for s in raw_str])

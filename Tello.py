@@ -14,10 +14,6 @@ class Tello:
         self.port = 9000
         self.locaddr = (self.host, self.port)
         self.tello_address = ('192.168.10.1', 8889)
-        self.speed = 0
-        self.battery = 0
-        self.current_time = 0
-        self.height = 0
         # Video Streaming Parameters
         self.stream_state = True
         self.last_frame = None
@@ -63,9 +59,3 @@ class Tello:
         msg = command.encode(encoding="utf-8")
         self.sock.sendto(msg, self.tello_address)
 
-    def get_status(self):
-
-        print('-----------Informaiton------------')
-        print('Speed: %f cm/s' % float(self.speed))
-        print('Battery: %f %%' % float(self.battery))
-        print('Time: %f' % float(self.current_time))
