@@ -17,7 +17,6 @@ class TelloState:
         self.tello_adderss = (self.tello_ip, self.tello_port)
         self.socket.sendto('command'.encode('utf-8'), self.tello_adderss)
 
-        # self.sock.bind(self.locaddr)
         self.begin_recv()
 
     def recv(self):

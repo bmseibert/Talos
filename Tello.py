@@ -1,11 +1,14 @@
 import threading
 import socket
+from threading import Thread
+
 import cv2
 import time
 from Talos import TelloState
 
 
 class Tello:
+
     def __init__(self):
         self.host = ''
         self.port = 9000
@@ -26,7 +29,6 @@ class Tello:
             print(err)
             exit()
         self.sock.bind(self.locaddr)
-        self.begin_recv()
         # Send Initialization command 'command' to Tello
         try:
             self.send_command('command')
@@ -34,32 +36,6 @@ class Tello:
             self.stream_video()
         except socket.error as err:
             print(err)
-
-    def recv(self):
-        count = 0
-        while True:
-            try:
-                data, server = self.sock.recvfrom(1518)
-                # print("Command Status: " + data.decode(encoding="utf-8"))
-                self.send_command('speed?')
-                data, server = self.sock.recvfrom(1518)
-                self.speed = data.decode(encoding="utf-8")
-                self.send_command('battery?')
-                data, server = self.sock.recvfrom(1518)
-                self.battery = data.decode(encoding="utf-8")
-                # self.send_command('time?')
-                # data, server = self.sock.recvfrom(1518)
-                # self.current_time = data.decode(encoding="utf-8")
-                self.send_command('height?')
-                data, server = self.sock.recvfrom(1518)
-                self.height = data.decode(encoding="utf-8")
-            except Exception:
-                print('\nExit . . .\n')
-                break
-
-    def begin_recv(self):
-        recv_thread = threading.Thread(target=self.recv)
-        recv_thread.start()
 
     def stream_video(self):
         self.send_command('streamon')
@@ -93,4 +69,3 @@ class Tello:
         print('Speed: %f cm/s' % float(self.speed))
         print('Battery: %f %%' % float(self.battery))
         print('Time: %f' % float(self.current_time))
-        # print('Height: ' + self.height)
