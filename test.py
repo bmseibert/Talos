@@ -15,5 +15,5 @@ class Test:
 
 
 Test1 = Test()
-# Test1.connection_test()
+Test1.connection_test()
 # exit()
